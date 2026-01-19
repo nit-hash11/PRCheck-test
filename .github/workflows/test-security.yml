@@ -1,0 +1,18 @@
+name: Vulnerability Scan
+on: [pull_request]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write # Allows the bot to comment
+      contents: read       # Allows the bot to see the code
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Essential for 'gh pr diff' to see history
+
+      - name: Run Inspector
+        uses: nit-hash11/PRCheck-test@main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

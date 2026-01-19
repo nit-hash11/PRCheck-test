@@ -1,18 +1,33 @@
-name: Vulnerability Scan
-on: [pull_request]
+name: Dependency Vulnerability Scan
+
+# This ensures the scan runs on every Pull Request
+on:
+  pull_request:
+    paths:
+      - '**/requirements.txt' # Only run if a dependency file is modified
 
 jobs:
-  security:
+  vulnerability-audit:
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write # Allows the bot to comment
-      contents: read       # Allows the bot to see the code
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0   # Essential for 'gh pr diff' to see history
 
-      - name: Run Inspector
+    # These permissions are mandatory for the GITHUB_TOKEN to work
+    permissions:
+      pull-requests: write # Allows the bot to post the table comment
+      contents: read       # Allows the bot to read the repository code
+
+    steps:
+      # Step 1: Download the code from the PR
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          # IMPORTANT: fetch-depth 0 downloads the history needed
+          # so 'gh pr diff' can compare versions.
+          fetch-depth: 0
+
+      # Step 2: Run your custom scanner from Folder 1
+      - name: Run PR Dependency Checker
+        # Replace 'nit-hash11' with your actual GitHub username
         uses: nit-hash11/PRChecker@main
         env:
+          # Pass the badge/token to the scanner
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
